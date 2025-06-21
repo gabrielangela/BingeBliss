@@ -29,7 +29,7 @@ export const movieAPI = {
     }
   },
 
-  // Get movie details
+  // Movie details
   getMovieDetails: async (movieId) => {
     try {
       const response = await fetch(
