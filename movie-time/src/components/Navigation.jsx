@@ -8,7 +8,7 @@ const Navigation = () => {
       <div className="container">
         <div className="nav-content">
           <Link to="/" className="logo">
-            Movie Time
+            BingeBliss
           </Link>
           <ul className="nav-links">
             <li>
