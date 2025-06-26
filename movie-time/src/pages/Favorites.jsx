@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import MovieCard from '../components/MovieCard';
+import MovieCarousel from '../components/MovieCarousel';
 
 const Favorites = () => {
   const [favorites, setFavorites] = useState([]);
@@ -28,16 +28,12 @@ const Favorites = () => {
         </div>
 
         {favorites.length > 0 ? (
-          <div className="movie-grid">
-            {favorites.map((movie) => (
-              <MovieCard
-                key={movie.id}
-                movie={movie}
-                onFavorite={removeFavorite}
-                isFavorite={true}
-              />
-            ))}
-          </div>
+          <MovieCarousel
+          movies={favorites}
+          title="Your Favorite Movies"
+          onFavorite={removeFavorite}
+          favorites={favorites}
+          />
         ) : (
           <div className="no-favorites">
             <div className="no-favorites-icon">

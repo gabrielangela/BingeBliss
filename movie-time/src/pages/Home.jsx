@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { movieAPI } from '../services/movieAPI';
 import MovieCard from '../components/MovieCard';
 import MovieList from '../components/MovieList';
-import MovieCarousel from '../components/MovieCarousel'; // Import the new carousel
+import MovieCarousel from '../components/MovieCarousel';
 import SearchBar from '../components/SearchBar';
 
 const Home = () => {
