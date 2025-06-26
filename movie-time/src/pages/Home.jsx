@@ -4,9 +4,19 @@ import MovieCard from '../components/MovieCard';
 import SearchBar from '../components/SearchBar';
 
 const Home = () => {
-  const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [popularMovies, setPopularMovies] = useState([]);
+  const [trendingMovies, setTrendingMovies] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState({
+    popular: true,
+    trending: true,
+    search: false
+  })
+  const [error, setError] = useState({
+    popular: null,
+    trending: null,
+    search: null
+  });
   const [searchMode, setSearchMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [favorites, setFavorites] = useState([]);
@@ -22,41 +32,61 @@ const Home = () => {
   // Fetch popular movies on component mount
   useEffect(() => {
     fetchPopularMovies();
+    fetchTrendingMovies();
   }, []);
 
   const fetchPopularMovies = async () => {
     try {
-      setLoading(true);
-      setError(null);
+      setLoading(prev => ({ ...prev, popular: true }));
+      setError(prev => ({ ...prev, popular: null }));
       const data = await movieAPI.getPopularMovies();
-      setMovies(data.results || []);
-      setSearchMode(false);
-      setSearchQuery('');
+      setPopularMovies(data.results || []);
     } catch (err) {
-      setError('Failed to fetch movies. Please try again.');
+      setError(prev => ({ ...prev, popular: 'Failed to fetch popular movies' }));
       console.error('Error fetching popular movies:', err);
     } finally {
-      setLoading(false);
+      setLoading(prev => ({ ...prev, popular: false }));
     }
   };
+
+  const fetchTrendingMovies = async () => {
+    try {
+      setLoading(prev => ({ ...prev, trending: true }));
+      setError(prev => ({ ...prev, trending: null }));
+      const data = await movieAPI.getTrendingMovies();
+      setTrendingMovies(data.results || []);
+    } catch (err) {
+      setError(prev => ({ ...prev, trending: 'Failed to fetch trending movies' }));
+      console.error('Error fetching trending movies:', err);
+    } finally {
+      setLoading(prev => ({ ...prev, trending: false }));
+    }
+  }
 
   const handleSearch = async (query) => {
     if (!query.trim()) return;
 
     try {
-      setLoading(true);
-      setError(null);
+      setLoading(prev => ({ ...prev, search: true }));
+      setError(prev => ({ ...prev, search: null }));
       const data = await movieAPI.searchMovies(query);
       setMovies(data.results || []);
       setSearchMode(true);
       setSearchQuery(query);
     } catch (err) {
-      setError('Failed to search movies. Please try again.');
+      setError(prev => ({ ...prev, search: 'Failed to search movies' }));
       console.error('Error searching movies:', err);
     } finally {
-      setLoading(false);
+      setLoading(prev => ({ ...prev, search: false }));
     }
   };
+
+  const clearSearch = () => {
+    setSearchMode(false);
+    setSearchQuery('');
+    setSearchResults([]);
+    setError(prev => ({ ...prev, search: null }));
+  }
 
   const toggleFavorite = (movie) => {
     const updatedFavorites = favorites.some(fav => fav.id === movie.id)
@@ -67,60 +97,61 @@ const Home = () => {
     localStorage.setItem('movieFavorites', JSON.stringify(updatedFavorites));
   };
 
-  const isFavorite = (movieId) => {
-    return favorites.some(fav => fav.id === movieId);
-  };
-
-  if (error) {
-    return (
-      <div className="main-content">
-        <div className="container">
-          <div className="error-message">
-            <h2>Oops! Something went wrong</h2>
-            <p>{error}</p>
-            <button className="btn btn-primary" onClick={fetchPopularMovies}>
-              Try Again
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="main-content">
       <div className="container">
-        <div className="page-header">
-          <h1>{searchMode ? `Search Results for "${searchQuery}"` : 'Popular Movies'}</h1>
-          {searchMode && (
-            <button className="btn btn-secondary" onClick={fetchPopularMovies}>
-              Back to Popular
-            </button>
-          )}
+        {/* Hero Section */}
+        <div className="hero-section">
+          <h1 className="hero-title">Discover Amazing Movies</h1>
+          <p className="hero-subtitle">
+            Find your next favorite film from thousands of movies
+          </p>
         </div>
 
-        <SearchBar onSearch={handleSearch} isLoading={loading} />
+        {/* Search Section */}
+        <SearchBar onSearch={handleSearch} isLoading={loading.search} />
 
-        {loading ? (
-          <div className="loading-container">
-            <div className="loading-spinner large"></div>
-            <p>Loading movies...</p>
+        {searchMode && (
+          <div className="search-header">
+            <h2>Search Results for "{searchQuery}"</h2>
+            <button className="btn btn-secondary" onClick={clearSearch}>
+              Clear Search
+            </button>
           </div>
-        ) : movies.length > 0 ? (
-          <div className="movie-grid">
-            {movies.map((movie) => (
-              <MovieCard
-                key={movie.id}
-                movie={movie}
-                onFavorite={toggleFavorite}
-                isFavorite={isFavorite(movie.id)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="no-results">
-            <h3>No movies found</h3>
-            <p>Try searching for something else</p>
+        )}
+
+        {/* Search Results */}
+        {searchMode && (
+          <MovieList
+            movies={searchResults}
+            loading={loading.search}
+            error={error.search}
+            title={`Found ${searchResults.length} results`}
+            onFavorite={toggleFavorite}
+            favorites={favorites}
+          />
+        )}
+
+        {/* Popular and Trending Movies */}
+        {!searchMode && (
+          <div className="movie-sections">
+            <MovieList
+              movies={trendingMovies}
+              loading={loading.trending}
+              error={error.trending}
+              title="🔥 Trending This Week"
+              onFavorite={toggleFavorite}
+              favorites={favorites}
+            />
+            
+            <MovieList
+              movies={popularMovies}
+              loading={loading.popular}
+              error={error.popular}
+              title="⭐ Popular Movies"
+              onFavorite={toggleFavorite}
+              favorites={favorites}
+            />
           </div>
         )}
       </div>
