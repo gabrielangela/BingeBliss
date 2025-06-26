@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { movieAPI } from '../services/movieAPI';
 import MovieCard from '../components/MovieCard';
+import MovieList from '../components/MovieList';
+import MovieCarousel from '../components/MovieCarousel'; // Import the new carousel
 import SearchBar from '../components/SearchBar';
 
 const Home = () => {
@@ -11,7 +13,7 @@ const Home = () => {
     popular: true,
     trending: true,
     search: false
-  })
+  });
   const [error, setError] = useState({
     popular: null,
     trending: null,
@@ -61,7 +63,7 @@ const Home = () => {
     } finally {
       setLoading(prev => ({ ...prev, trending: false }));
     }
-  }
+  };
 
   const handleSearch = async (query) => {
     if (!query.trim()) return;
@@ -70,7 +72,7 @@ const Home = () => {
       setLoading(prev => ({ ...prev, search: true }));
       setError(prev => ({ ...prev, search: null }));
       const data = await movieAPI.searchMovies(query);
-      setMovies(data.results || []);
+      setSearchResults(data.results || []);
       setSearchMode(true);
       setSearchQuery(query);
     } catch (err) {
@@ -86,13 +88,13 @@ const Home = () => {
     setSearchQuery('');
     setSearchResults([]);
     setError(prev => ({ ...prev, search: null }));
-  }
+  };
 
   const toggleFavorite = (movie) => {
     const updatedFavorites = favorites.some(fav => fav.id === movie.id)
       ? favorites.filter(fav => fav.id !== movie.id)
       : [...favorites, movie];
-    
+
     setFavorites(updatedFavorites);
     localStorage.setItem('movieFavorites', JSON.stringify(updatedFavorites));
   };
@@ -120,35 +122,37 @@ const Home = () => {
           </div>
         )}
 
-        {/* Search Results */}
+        {/* Search Results - Use regular grid for search results */}
         {searchMode && (
-          <MovieList
-            movies={searchResults}
-            loading={loading.search}
-            error={error.search}
-            title={`Found ${searchResults.length} results`}
-            onFavorite={toggleFavorite}
-            favorites={favorites}
-          />
+          <div className="search-results">
+            <MovieList
+              movies={searchResults}
+              loading={loading.search}
+              error={error.search}
+              title={`Found ${searchResults.length} results`}
+              onFavorite={toggleFavorite}
+              favorites={favorites}
+            />
+          </div>
         )}
 
-        {/* Popular and Trending Movies */}
+        {/* Popular and Trending Movies - Use Carousel */}
         {!searchMode && (
           <div className="movie-sections">
-            <MovieList
+            <MovieCarousel
               movies={trendingMovies}
               loading={loading.trending}
               error={error.trending}
-              title="🔥 Trending This Week"
+              title="Trending This Week"
               onFavorite={toggleFavorite}
               favorites={favorites}
             />
             
-            <MovieList
+            <MovieCarousel
               movies={popularMovies}
               loading={loading.popular}
               error={error.popular}
-              title="⭐ Popular Movies"
+              title="Popular Movies"
               onFavorite={toggleFavorite}
               favorites={favorites}
             />

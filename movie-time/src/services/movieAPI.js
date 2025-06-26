@@ -20,7 +20,7 @@ export const movieAPI = {
   searchMovies: async (query, page = 1) => {
     try {
       const response = await fetch(
-        `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${query}&page=${page}&include_adult=false`
+        `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&page=${page}&include_adult=false`
       );
       return await response.json();
     } catch (error) {
@@ -40,33 +40,33 @@ export const movieAPI = {
       console.error('Error fetching movie details:', error);
       throw error;
     }
+  },
+
+  // Add trending movies
+  getTrendingMovies: async (timeWindow = 'week') => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/trending/movie/${timeWindow}?api_key=${API_KEY}`
+      );
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching trending movies:', error);
+      throw error;
+    }
+  },
+
+  // Get movie genres
+  getGenres: async () => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/genre/movie/list?api_key=${API_KEY}`
+      );
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching genres:', error);
+      throw error;
+    }
   }
 };
-
-// Add trending movies
-getTrendingMovies: async (timeWindow = 'week') => {
-  try {
-    const response = await fetch(
-      `${BASE_URL}/trending/movie/${timeWindow}?api_key=${API_KEY}`
-    );
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching trending movies:', error);
-    throw error;
-  }
-},
-
-// Get movie genres
-getGenres: async () => {
-  try {
-    const response = await fetch(
-      `${BASE_URL}/genre/movie/list?api_key=${API_KEY}`
-    );
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching genres:', error);
-    throw error;
-  }
-}
 
 export { IMAGE_BASE_URL };
