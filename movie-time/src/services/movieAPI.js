@@ -43,4 +43,30 @@ export const movieAPI = {
   }
 };
 
+// Add trending movies
+getTrendingMovies: async (timeWindow = 'week') => {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/trending/movie/${timeWindow}?api_key=${API_KEY}`
+    );
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching trending movies:', error);
+    throw error;
+  }
+},
+
+// Get movie genres
+getGenres: async () => {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/genre/movie/list?api_key=${API_KEY}`
+    );
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching genres:', error);
+    throw error;
+  }
+}
+
 export { IMAGE_BASE_URL };
